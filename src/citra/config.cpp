@@ -63,8 +63,8 @@ void Config::ReadValues() {
     // Renderer
     Settings::values.use_hw_renderer = sdl2_config->GetBoolean("Renderer", "use_hw_renderer", true);
     Settings::values.use_shader_jit = sdl2_config->GetBoolean("Renderer", "use_shader_jit", true);
-    Settings::values.use_scaled_resolution =
-        sdl2_config->GetBoolean("Renderer", "use_scaled_resolution", false);
+    Settings::values.resolution_factor =
+        (float)sdl2_config->GetReal("Renderer", "resolution_factor", 1.0);
     Settings::values.use_vsync = sdl2_config->GetBoolean("Renderer", "use_vsync", false);
     Settings::values.toggle_framelimit =
         sdl2_config->GetBoolean("Renderer", "toggle_framelimit", true);
@@ -89,7 +89,8 @@ void Config::ReadValues() {
 
     // System
     Settings::values.is_new_3ds = sdl2_config->GetBoolean("System", "is_new_3ds", false);
-    Settings::values.region_value = sdl2_config->GetInteger("System", "region_value", 1);
+    Settings::values.region_value =
+        sdl2_config->GetInteger("System", "region_value", Settings::REGION_VALUE_AUTO_SELECT);
 
     // Miscellaneous
     Settings::values.log_filter = sdl2_config->Get("Miscellaneous", "log_filter", "*:Info");

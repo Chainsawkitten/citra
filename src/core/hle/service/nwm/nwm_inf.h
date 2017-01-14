@@ -1,4 +1,4 @@
-// Copyright 2014 Citra Emulator Project
+// Copyright 2016 Citra Emulator Project
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
@@ -7,17 +7,16 @@
 #include "core/hle/service/service.h"
 
 namespace Service {
-namespace AC {
+namespace NWM {
 
-class AC_U final : public Interface {
+class NWM_INF final : public Interface {
 public:
-    AC_U();
-    ~AC_U();
+    NWM_INF();
 
     std::string GetPortName() const override {
-        return "ac:u";
+        return "nwm::INF";
     }
 };
 
-} // namespace AC
+} // namespace NWM
 } // namespace Service

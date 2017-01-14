@@ -88,7 +88,7 @@ struct Values {
     // Renderer
     bool use_hw_renderer;
     bool use_shader_jit;
-    bool use_scaled_resolution;
+    float resolution_factor;
     bool use_vsync;
     bool toggle_framelimit;
 
@@ -109,6 +109,10 @@ struct Values {
     bool use_gdbstub;
     u16 gdbstub_port;
 } extern values;
+
+// a special value for Values::region_value indicating that citra will automatically select a region
+// value to fit the region lockout info of the game
+static constexpr int REGION_VALUE_AUTO_SELECT = -1;
 
 void Apply();
 }

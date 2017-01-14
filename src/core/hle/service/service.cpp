@@ -6,9 +6,8 @@
 
 #include "common/logging/log.h"
 #include "common/string_util.h"
-
 #include "core/hle/kernel/server_port.h"
-#include "core/hle/service/ac_u.h"
+#include "core/hle/service/ac/ac.h"
 #include "core/hle/service/act/act.h"
 #include "core/hle/service/am/am.h"
 #include "core/hle/service/apt/apt.h"
@@ -35,7 +34,7 @@
 #include "core/hle/service/nfc/nfc.h"
 #include "core/hle/service/nim/nim.h"
 #include "core/hle/service/ns_s.h"
-#include "core/hle/service/nwm_uds.h"
+#include "core/hle/service/nwm/nwm.h"
 #include "core/hle/service/pm_app.h"
 #include "core/hle/service/ptm/ptm.h"
 #include "core/hle/service/qtm/qtm.h"
@@ -138,6 +137,7 @@ void Init() {
     AddNamedPort(new ERR::ERR_F);
 
     FS::ArchiveInit();
+    AC::Init();
     ACT::Init();
     AM::Init();
     APT::Init();
@@ -154,10 +154,10 @@ void Init() {
     NEWS::Init();
     NFC::Init();
     NIM::Init();
+    NWM::Init();
     PTM::Init();
     QTM::Init();
 
-    AddService(new AC::AC_U);
     AddService(new CSND::CSND_SND);
     AddService(new DSP_DSP::Interface);
     AddService(new GSP::GSP_GPU);
@@ -166,7 +166,6 @@ void Init() {
     AddService(new LDR::LDR_RO);
     AddService(new MIC::MIC_U);
     AddService(new NS::NS_S);
-    AddService(new NWM::NWM_UDS);
     AddService(new PM::PM_APP);
     AddService(new SOC::SOC_U);
     AddService(new SSL::SSL_C);
@@ -177,8 +176,8 @@ void Init() {
 
 /// Shutdown ServiceManager
 void Shutdown() {
-
     PTM::Shutdown();
+    NFC::Shutdown();
     NIM::Shutdown();
     NEWS::Shutdown();
     NDM::Shutdown();
@@ -192,6 +191,7 @@ void Shutdown() {
     BOSS::Shutdown();
     APT::Shutdown();
     AM::Shutdown();
+    AC::Shutdown();
     FS::ArchiveShutdown();
 
     g_srv_services.clear();

@@ -35,8 +35,10 @@ public:
     bool signaled;    ///< Whether the event has already been signaled
     std::string name; ///< Name of event (optional)
 
-    bool ShouldWait() override;
-    void Acquire() override;
+    bool ShouldWait(Thread* thread) const override;
+    void Acquire(Thread* thread) override;
+
+    void WakeupAllWaitingThreads() override;
 
     void Signal();
     void Clear();

@@ -31,20 +31,15 @@ SharedPtr<Timer> Timer::Create(ResetType reset_type, std::string name) {
     timer->interval_delay = 0;
     timer->callback_handle = timer_callback_handle_table.Create(timer).MoveFrom();
 
-    if (reset_type == ResetType::Pulse) {
-        LOG_ERROR(Kernel, "Unimplemented timer reset type Pulse");
-        UNIMPLEMENTED();
-    }
-
     return timer;
 }
 
-bool Timer::ShouldWait() {
+bool Timer::ShouldWait(Thread* thread) const {
     return !signaled;
 }
 
-void Timer::Acquire() {
-    ASSERT_MSG(!ShouldWait(), "object unavailable!");
+void Timer::Acquire(Thread* thread) {
+    ASSERT_MSG(!ShouldWait(thread), "object unavailable!");
 
     if (reset_type == ResetType::OneShot)
         signaled = false;
@@ -68,6 +63,13 @@ void Timer::Cancel() {
 
 void Timer::Clear() {
     signaled = false;
+}
+
+void Timer::WakeupAllWaitingThreads() {
+    WaitObject::WakeupAllWaitingThreads();
+
+    if (reset_type == ResetType::Pulse)
+        signaled = false;
 }
 
 /// The timer callback event, called when a timer is fired

@@ -3,11 +3,9 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/scm_rev.cpp.in" "${CMAKE_CURRENT_SOU
 
 set(SRCS
             break_points.cpp
-            emu_window.cpp
             file_util.cpp
             framebuffer_layout.cpp
             hash.cpp
-            key_map.cpp
             logging/filter.cpp
             logging/text_formatter.cpp
             logging/backend.cpp
@@ -34,11 +32,9 @@ set(HEADERS
             common_funcs.h
             common_paths.h
             common_types.h
-            emu_window.h
             file_util.h
             framebuffer_layout.h
             hash.h
-            key_map.h
             linear_disk_cache.h
             logging/text_formatter.h
             logging/filter.h
@@ -50,6 +46,7 @@ set(HEADERS
             microprofileui.h
             platform.h
             profiler_reporting.h
+            quaternion.h
             scm_rev.h
             scope_exit.h
             string_util.h

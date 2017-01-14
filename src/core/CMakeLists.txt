@@ -29,9 +29,11 @@ set(SRCS
             file_sys/ivfc_archive.cpp
             file_sys/path_parser.cpp
             file_sys/savedata_archive.cpp
+            frontend/emu_window.cpp
+            frontend/key_map.cpp
+            frontend/motion_emu.cpp
             gdbstub/gdbstub.cpp
             hle/config_mem.cpp
-            hle/hle.cpp
             hle/applets/applet.cpp
             hle/applets/erreula.cpp
             hle/applets/mii_selector.cpp
@@ -52,7 +54,9 @@ set(SRCS
             hle/kernel/thread.cpp
             hle/kernel/timer.cpp
             hle/kernel/vm_manager.cpp
-            hle/service/ac_u.cpp
+            hle/service/ac/ac.cpp
+            hle/service/ac/ac_i.cpp
+            hle/service/ac/ac_u.cpp
             hle/service/act/act.cpp
             hle/service/act/act_a.cpp
             hle/service/act/act_u.cpp
@@ -124,7 +128,14 @@ set(SRCS
             hle/service/nim/nim_s.cpp
             hle/service/nim/nim_u.cpp
             hle/service/ns_s.cpp
-            hle/service/nwm_uds.cpp
+            hle/service/nwm/nwm.cpp
+            hle/service/nwm/nwm_cec.cpp
+            hle/service/nwm/nwm_ext.cpp
+            hle/service/nwm/nwm_inf.cpp
+            hle/service/nwm/nwm_sap.cpp
+            hle/service/nwm/nwm_soc.cpp
+            hle/service/nwm/nwm_tst.cpp
+            hle/service/nwm/nwm_uds.cpp
             hle/service/pm_app.cpp
             hle/service/ptm/ptm.cpp
             hle/service/ptm/ptm_gets.cpp
@@ -155,7 +166,6 @@ set(SRCS
             tracer/recorder.cpp
             memory.cpp
             settings.cpp
-            system.cpp
             )
 
 set(HEADERS
@@ -193,10 +203,12 @@ set(HEADERS
             file_sys/ivfc_archive.h
             file_sys/path_parser.h
             file_sys/savedata_archive.h
+            frontend/emu_window.h
+            frontend/key_map.h
+            frontend/motion_emu.h
             gdbstub/gdbstub.h
             hle/config_mem.h
             hle/function_wrappers.h
-            hle/hle.h
             hle/ipc.h
             hle/applets/applet.h
             hle/applets/erreula.h
@@ -219,7 +231,9 @@ set(HEADERS
             hle/kernel/timer.h
             hle/kernel/vm_manager.h
             hle/result.h
-            hle/service/ac_u.h
+            hle/service/ac/ac.h
+            hle/service/ac/ac_i.h
+            hle/service/ac/ac_u.h
             hle/service/act/act.h
             hle/service/act/act_a.h
             hle/service/act/act_u.h
@@ -291,7 +305,14 @@ set(HEADERS
             hle/service/nim/nim_s.h
             hle/service/nim/nim_u.h
             hle/service/ns_s.h
-            hle/service/nwm_uds.h
+            hle/service/nwm/nwm.h
+            hle/service/nwm/nwm_cec.h
+            hle/service/nwm/nwm_ext.h
+            hle/service/nwm/nwm_inf.h
+            hle/service/nwm/nwm_sap.h
+            hle/service/nwm/nwm_soc.h
+            hle/service/nwm/nwm_tst.h
+            hle/service/nwm/nwm_uds.h
             hle/service/pm_app.h
             hle/service/ptm/ptm.h
             hle/service/ptm/ptm_gets.h
@@ -325,7 +346,6 @@ set(HEADERS
             memory_setup.h
             mmio.h
             settings.h
-            system.h
             )
 
 include_directories(../../externals/dynarmic/include)

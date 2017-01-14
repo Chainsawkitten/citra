@@ -22,23 +22,17 @@ SharedPtr<Event> Event::Create(ResetType reset_type, std::string name) {
     evt->reset_type = reset_type;
     evt->name = std::move(name);
 
-    if (reset_type == ResetType::Pulse) {
-        LOG_ERROR(Kernel, "Unimplemented event reset type Pulse");
-        UNIMPLEMENTED();
-    }
-
     return evt;
 }
 
-bool Event::ShouldWait() {
+bool Event::ShouldWait(Thread* thread) const {
     return !signaled;
 }
 
-void Event::Acquire() {
-    ASSERT_MSG(!ShouldWait(), "object unavailable!");
+void Event::Acquire(Thread* thread) {
+    ASSERT_MSG(!ShouldWait(thread), "object unavailable!");
 
-    // Release the event if it's not sticky...
-    if (reset_type != ResetType::Sticky)
+    if (reset_type == ResetType::OneShot)
         signaled = false;
 }
 
@@ -49,6 +43,13 @@ void Event::Signal() {
 
 void Event::Clear() {
     signaled = false;
+}
+
+void Event::WakeupAllWaitingThreads() {
+    WaitObject::WakeupAllWaitingThreads();
+
+    if (reset_type == ResetType::Pulse)
+        signaled = false;
 }
 
 } // namespace

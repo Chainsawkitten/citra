@@ -35,6 +35,7 @@
 #include "core/arm/arm_interface.h"
 #include "core/core.h"
 #include "core/gdbstub/gdbstub.h"
+#include "core/loader/loader.h"
 #include "core/memory.h"
 
 const int GDB_BUFFER_SIZE = 10000;
@@ -56,7 +57,6 @@ const u32 SIGTERM = 15;
 const u32 MSG_WAITALL = 8;
 #endif
 
-const u32 R0_REGISTER = 0;
 const u32 R15_REGISTER = 15;
 const u32 CPSR_REGISTER = 25;
 const u32 FPSCR_REGISTER = 58;
@@ -449,9 +449,9 @@ static void SendSignal(u32 signal) {
 
     latest_signal = signal;
 
-    std::string buffer = Common::StringFromFormat("T%02x%02x:%08x;%02x:%08x;", latest_signal, 15,
-                                                  htonl(Core::g_app_core->GetPC()), 13,
-                                                  htonl(Core::g_app_core->GetReg(13)));
+    std::string buffer =
+        Common::StringFromFormat("T%02x%02x:%08x;%02x:%08x;", latest_signal, 15,
+                                 htonl(Core::CPU().GetPC()), 13, htonl(Core::CPU().GetReg(13)));
     LOG_DEBUG(Debug_GDBStub, "Response: %s", buffer.c_str());
     SendReply(buffer.c_str());
 }
@@ -538,15 +538,15 @@ static void ReadRegister() {
     }
 
     if (id <= R15_REGISTER) {
-        IntToGdbHex(reply, Core::g_app_core->GetReg(id));
+        IntToGdbHex(reply, Core::CPU().GetReg(id));
     } else if (id == CPSR_REGISTER) {
-        IntToGdbHex(reply, Core::g_app_core->GetCPSR());
+        IntToGdbHex(reply, Core::CPU().GetCPSR());
     } else if (id > CPSR_REGISTER && id < FPSCR_REGISTER) {
-        IntToGdbHex(reply, Core::g_app_core->GetVFPReg(
+        IntToGdbHex(reply, Core::CPU().GetVFPReg(
                                id - CPSR_REGISTER -
                                1)); // VFP registers should start at 26, so one after CSPR_REGISTER
     } else if (id == FPSCR_REGISTER) {
-        IntToGdbHex(reply, Core::g_app_core->GetVFPSystemReg(VFP_FPSCR)); // Get FPSCR
+        IntToGdbHex(reply, Core::CPU().GetVFPSystemReg(VFP_FPSCR)); // Get FPSCR
         IntToGdbHex(reply + 8, 0);
     } else {
         return SendReply("E01");
@@ -563,22 +563,22 @@ static void ReadRegisters() {
     u8* bufptr = buffer;
 
     for (int reg = 0; reg <= R15_REGISTER; reg++) {
-        IntToGdbHex(bufptr + reg * CHAR_BIT, Core::g_app_core->GetReg(reg));
+        IntToGdbHex(bufptr + reg * CHAR_BIT, Core::CPU().GetReg(reg));
     }
 
     bufptr += (16 * CHAR_BIT);
 
-    IntToGdbHex(bufptr, Core::g_app_core->GetCPSR());
+    IntToGdbHex(bufptr, Core::CPU().GetCPSR());
 
     bufptr += CHAR_BIT;
 
     for (int reg = 0; reg <= 31; reg++) {
-        IntToGdbHex(bufptr + reg * CHAR_BIT, Core::g_app_core->GetVFPReg(reg));
+        IntToGdbHex(bufptr + reg * CHAR_BIT, Core::CPU().GetVFPReg(reg));
     }
 
     bufptr += (32 * CHAR_BIT);
 
-    IntToGdbHex(bufptr, Core::g_app_core->GetVFPSystemReg(VFP_FPSCR));
+    IntToGdbHex(bufptr, Core::CPU().GetVFPSystemReg(VFP_FPSCR));
 
     SendReply(reinterpret_cast<char*>(buffer));
 }
@@ -595,13 +595,13 @@ static void WriteRegister() {
     }
 
     if (id <= R15_REGISTER) {
-        Core::g_app_core->SetReg(id, GdbHexToInt(buffer_ptr));
+        Core::CPU().SetReg(id, GdbHexToInt(buffer_ptr));
     } else if (id == CPSR_REGISTER) {
-        Core::g_app_core->SetCPSR(GdbHexToInt(buffer_ptr));
+        Core::CPU().SetCPSR(GdbHexToInt(buffer_ptr));
     } else if (id > CPSR_REGISTER && id < FPSCR_REGISTER) {
-        Core::g_app_core->SetVFPReg(id - CPSR_REGISTER - 1, GdbHexToInt(buffer_ptr));
+        Core::CPU().SetVFPReg(id - CPSR_REGISTER - 1, GdbHexToInt(buffer_ptr));
     } else if (id == FPSCR_REGISTER) {
-        Core::g_app_core->SetVFPSystemReg(VFP_FPSCR, GdbHexToInt(buffer_ptr));
+        Core::CPU().SetVFPSystemReg(VFP_FPSCR, GdbHexToInt(buffer_ptr));
     } else {
         return SendReply("E01");
     }
@@ -618,20 +618,19 @@ static void WriteRegisters() {
 
     for (int i = 0, reg = 0; reg <= FPSCR_REGISTER; i++, reg++) {
         if (reg <= R15_REGISTER) {
-            Core::g_app_core->SetReg(reg, GdbHexToInt(buffer_ptr + i * CHAR_BIT));
+            Core::CPU().SetReg(reg, GdbHexToInt(buffer_ptr + i * CHAR_BIT));
         } else if (reg == CPSR_REGISTER) {
-            Core::g_app_core->SetCPSR(GdbHexToInt(buffer_ptr + i * CHAR_BIT));
+            Core::CPU().SetCPSR(GdbHexToInt(buffer_ptr + i * CHAR_BIT));
         } else if (reg == CPSR_REGISTER - 1) {
             // Dummy FPA register, ignore
         } else if (reg < CPSR_REGISTER) {
             // Dummy FPA registers, ignore
             i += 2;
         } else if (reg > CPSR_REGISTER && reg < FPSCR_REGISTER) {
-            Core::g_app_core->SetVFPReg(reg - CPSR_REGISTER - 1,
-                                        GdbHexToInt(buffer_ptr + i * CHAR_BIT));
+            Core::CPU().SetVFPReg(reg - CPSR_REGISTER - 1, GdbHexToInt(buffer_ptr + i * CHAR_BIT));
             i++; // Skip padding
         } else if (reg == FPSCR_REGISTER) {
-            Core::g_app_core->SetVFPSystemReg(VFP_FPSCR, GdbHexToInt(buffer_ptr + i * CHAR_BIT));
+            Core::CPU().SetVFPSystemReg(VFP_FPSCR, GdbHexToInt(buffer_ptr + i * CHAR_BIT));
         }
     }
 
@@ -816,10 +815,6 @@ static void RemoveBreakpoint() {
     auto addr_pos = std::find(start_offset, command_buffer + command_length, ',');
     PAddr addr = HexToInt(start_offset, static_cast<u32>(addr_pos - start_offset));
 
-    start_offset = addr_pos + 1;
-    u32 len =
-        HexToInt(start_offset, static_cast<u32>((command_buffer + command_length) - start_offset));
-
     if (type == BreakpointType::Access) {
         // Access is made up of Read and Write types, so add both breakpoints
         type = BreakpointType::Read;
@@ -908,7 +903,7 @@ void ToggleServer(bool status) {
         server_enabled = status;
 
         // Start server
-        if (!IsConnected() && Core::g_sys_core != nullptr) {
+        if (!IsConnected() && Core::System().GetInstance().IsPoweredOn()) {
             Init();
         }
     } else {

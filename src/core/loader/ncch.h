@@ -171,52 +171,24 @@ public:
      */
     static FileType IdentifyType(FileUtil::IOFile& file);
 
-    /**
-     * Returns the type of this file
-     * @return FileType corresponding to the loaded file
-     */
     FileType GetFileType() override {
         return IdentifyType(file);
     }
 
-    /**
-     * Load the application
-     * @return ResultStatus result of function
-     */
     ResultStatus Load() override;
 
     /**
      * Loads the Exheader and returns the system mode for this application.
      * @return Optional with the kernel system mode
      */
-    boost::optional<u32> LoadKernelSystemMode();
+    boost::optional<u32> LoadKernelSystemMode() override;
 
-    /**
-     * Get the code (typically .code section) of the application
-     * @param buffer Reference to buffer to store data
-     * @return ResultStatus result of function
-     */
     ResultStatus ReadCode(std::vector<u8>& buffer) override;
 
-    /**
-     * Get the icon (typically icon section) of the application
-     * @param buffer Reference to buffer to store data
-     * @return ResultStatus result of function
-     */
     ResultStatus ReadIcon(std::vector<u8>& buffer) override;
 
-    /**
-     * Get the banner (typically banner section) of the application
-     * @param buffer Reference to buffer to store data
-     * @return ResultStatus result of function
-     */
     ResultStatus ReadBanner(std::vector<u8>& buffer) override;
 
-    /**
-     * Get the logo (typically logo section) of the application
-     * @param buffer Reference to buffer to store data
-     * @return ResultStatus result of function
-     */
     ResultStatus ReadLogo(std::vector<u8>& buffer) override;
 
     /**
@@ -256,6 +228,9 @@ private:
      * @return ResultStatus result of function
      */
     ResultStatus LoadExeFS();
+
+    /// Reads the region lockout info in the SMDH and send it to CFG service
+    void ParseRegionLockoutInfo();
 
     bool is_exefs_loaded = false;
     bool is_compressed = false;

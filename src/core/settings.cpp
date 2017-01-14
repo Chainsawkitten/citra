@@ -7,7 +7,7 @@
 #include "settings.h"
 #include "video_core/video_core.h"
 
-#include "common/emu_window.h"
+#include "core/frontend/emu_window.h"
 
 namespace Settings {
 
@@ -20,7 +20,6 @@ void Apply() {
 
     VideoCore::g_hw_renderer_enabled = values.use_hw_renderer;
     VideoCore::g_shader_jit_enabled = values.use_shader_jit;
-    VideoCore::g_scaled_resolution_enabled = values.use_scaled_resolution;
     VideoCore::g_toggle_framelimit_enabled = values.toggle_framelimit;
 
     if (VideoCore::g_emu_window) {
